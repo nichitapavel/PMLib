@@ -3,9 +3,9 @@
 
 import socket, struct
 from optparse import OptionParser
+from datetime import datetime
 import signal 
 import sys
-import time
 
 def handler(signum, frame):
     if mode == "read":
@@ -119,7 +119,7 @@ def readdevice(client, dev_name, frequency):
                 sample+= "%5.2f : " % (line_power)
                 lines_array.append( "%.2f" % (line_power) )
 
-            print "%s - %s =  %2.2f" % (time.strftime("%H:%M:%S", time.localtime()), sample[:-2], sum_)
+            print "%s - %s =  %2.2f" % (datetime.now().strftime("%H:%M:%S.%f")[:-2], sample[:-2], sum_)
            # send_all_data(client, struct.pack("i", 1) )
 
 if __name__ == "__main__":
