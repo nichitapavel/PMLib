@@ -7,10 +7,12 @@ from datetime import datetime
 import signal 
 import sys
 
+
 def handler(signum, frame):
     if mode == "read":
         send_all_data(client, struct.pack("i", 0) )
         client.close()
+
 
 def receive_data(client, datatype):
     try:
@@ -24,6 +26,7 @@ def receive_data(client, datatype):
     
     return struct.unpack(datatype, msg)[0]
 
+
 def send_all_data(client, msg):
     totalsent = 0
     while totalsent < len(msg):
@@ -31,6 +34,7 @@ def send_all_data(client, msg):
         if sent == 0:
             raise RuntimeError
         totalsent = totalsent + sent
+
 
 def show(client, lines= False, counters= False):
 
@@ -88,6 +92,7 @@ def show(client, lines= False, counters= False):
 
     client.close()
 
+
 def readdevice(client, dev_name, frequency):
 
     send_all_data(client, struct.pack("i", 9) )
@@ -121,6 +126,7 @@ def readdevice(client, dev_name, frequency):
 
             print "%s - %s =  %2.2f" % (datetime.now().strftime("%H:%M:%S.%f")[:-2], sample[:-2], sum_)
            # send_all_data(client, struct.pack("i", 1) )
+
 
 if __name__ == "__main__":
 
@@ -163,5 +169,3 @@ if __name__ == "__main__":
         show(client, lines, counters)
 
     client.close()
-
-
