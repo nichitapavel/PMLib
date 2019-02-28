@@ -34,6 +34,11 @@ set( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake.modules )
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
+# Boost libraries location
+set(BOOST_ROOT_PATH "../deb/usr")
+set(BOOST_LIBRARYDIR "${BOOST_ROOT_PATH}/lib/arm-linux-gnueabihf")
+set(BOOST_INCLUDEDIR "${BOOST_ROOT_PATH}/include")
+
 #set(CMAKE_CXX_COMPILER "clang++-3.6")
 #set(CMAKE_C_COMPILER "clang-3.6")
 
