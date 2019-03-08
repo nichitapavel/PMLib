@@ -31,7 +31,7 @@ set( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake.modules )
 # INCLUDE (${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
 # INCLUDE (${CMAKE_ROOT}/Modules/CheckSymbolExists.cmake)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -O3")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 # Boost libraries location
