@@ -1,0 +1,54 @@
+<html>
+<head><title>JavaScript websocket</title></head>
+<body>
+    <h1>JavaScript websocket</h1>
+
+    <h2><span id="connected"></span>
+        Just type something</h2>
+
+    <form id="form" onsubmit="addMessage(); return false;">
+        Text: <input type="text" name="something">
+    </form>
+
+    <span>
+        <h2>text send</h2>
+        <div id="sent"></div>
+    </span>
+
+    <span>
+        <h2>text received</h2>
+        <div id="received"></div>
+    </span>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+    <script type="text/javascript">
+        window.addEventListener("load", onLoad, false);
+
+        function onLoad() {
+          var wsUri = "ws://localhost:8888";
+          socket = new WebSocket(wsUri);
+          socket.onopen = function(evt) { onOpen(evt) };
+          socket.onclose = function(evt) { onClose(evt) };
+          socket.onmessage = function(evt) { onMessage(evt) };
+          socket.onerror = function(evt) { onError(evt) };
+        }
+
+        function onOpen(evt) {}
+
+        function onClose(evt) {}
+
+        function onMessage(evt) {
+            $("#received").text($("#received").text() + evt["data"])
+        }
+
+        function onError(evt) {}
+
+        function addMessage() {
+            var value = $("#form").serializeArray()[0].value;
+            $("#sent").text($("#sent").text() + value)
+            socket.send(value)
+        }
+    </script>
+</body>
+</html>
