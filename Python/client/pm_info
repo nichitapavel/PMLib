@@ -23,8 +23,15 @@ def receive_data(client, datatype):
     except:
        client.close()
        sys.exit(1)
-    
-    return struct.unpack(datatype, msg)[0]
+
+    try:
+        return struct.unpack(datatype, msg)[0]
+    except struct.error as err:
+        print('Error found! Here are the details:')
+        print('datatype: ' + datatype + '\t msg: ' + msg)
+        print err
+        client.close()
+        sys.exit(1)
 
 
 def send_all_data(client, msg):
