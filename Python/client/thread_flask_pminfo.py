@@ -9,6 +9,7 @@ import urlparse
 from Queue import Empty, Queue
 from datetime import datetime
 from optparse import OptionParser
+from time import sleep
 
 from enum import Enum
 from flask import request, Flask
@@ -112,12 +113,14 @@ class PMInfoThread(threading.Thread):
 
                 if count > 10000:
                     average = last_ten_thousands / count
-                    if average < 2500:
-                        self.logger.info('average below 2500')
+                    if average < 6510:
+                        self.logger.info('average below 6510')
                         self.logger.info('average %d with count %d', average, count)
+                        pool[1].stop_request.set()
                         self.stop_request.set()
+
                     else:
-                        self.logger.info('average higher 2500')
+                        self.logger.info('average higher 6510')
                         self.logger.info('average %d with count %d', average, count)
                         last_ten_thousands = 0.0
                         count = 0
@@ -222,7 +225,7 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    global client, mode
+    global client, mode, pool
     mode = 'read'
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -230,10 +233,15 @@ def main():
     signal.signal(signal.SIGINT, handler)
 
     pool = [PMInfoThread(marks=marks), FlaskThread(marks=marks)]
-    pool[0].daemon = True
+    # pool[0].daemon = True
 
     for thread in pool:
+        thread.daemon = True
         thread.start()
+
+    while pool[0].is_alive() and pool[1].is_alive():
+        sleep(10)
+    sys.exit(0)
 
 
 if __name__ == '__main__':
