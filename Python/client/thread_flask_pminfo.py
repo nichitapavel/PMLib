@@ -4,6 +4,7 @@ import socket
 import struct
 import sys
 import threading
+import os
 import urllib
 import urlparse
 from Queue import Empty, Queue
@@ -96,6 +97,9 @@ class PMInfoThread(threading.Thread):
         count = 0
         last_ten_thousands = 0.0
 
+        f = open(file, 'w')
+        f.write('Time,Power(mWatt),Operation\n')
+
         while not self.stop_request.isSet():
             try:
                 lines = receive_data(client, "i")
@@ -105,37 +109,51 @@ class PMInfoThread(threading.Thread):
                     line_power = receive_data(client, "d")
                     lines_array.append("%.2f" % (line_power))
 
-                wattage = 0.0
-                if len(lines_array) != 0:
-                    wattage = lines_array[0]
-                    last_ten_thousands += float(wattage)
-                    count += 1
+                # wattage = 0.0
+                # if len(lines_array) != 0:
+                #     wattage = lines_array[0]
+                #     last_ten_thousands += float(wattage)
+                #     count += 1
 
-                if count > 10000:
-                    average = last_ten_thousands / count
-                    if average < 6510:
-                        self.logger.info('average below 6510')
-                        self.logger.info('average %d with count %d', average, count)
-                        pool[1].stop_request.set()
-                        self.stop_request.set()
+                # if count > 10000:
+                #     average = last_ten_thousands / count
+                #     if average < 6510:
+                #         self.logger.info('average below 6510')
+                #         self.logger.info('average %d with count %d', average, count)
+                #         pool[1].stop_request.set()
+                #         self.stop_request.set()
+                #
+                #     else:
+                #         self.logger.info('average higher 6510')
+                #         self.logger.info('average %d with count %d', average, count)
+                #         last_ten_thousands = 0.0
+                #         count = 0
 
-                    else:
-                        self.logger.info('average higher 6510')
-                        self.logger.info('average %d with count %d', average, count)
-                        last_ten_thousands = 0.0
-                        count = 0
-
-                self.logger.info(wattage)
+                # self.logger.info(wattage)
 
                 if not self.marks.empty():
                     mark = self.marks.get()
                     self.marks.task_done()
-                    self.logger.info(
-                        '[device:' + mark.get('device') +
-                        '][device timestamp:' + mark.get('device timestamp') +
-                        '][local timestamp:' + str(mark.get('local timestamp')) +
-                        '][operation:' + mark.get('operation') +
-                        ']'
+                    # self.logger.info(
+                    #     '[device:' + mark.get('device') +
+                    #     '][device timestamp:' + mark.get('device timestamp') +
+                    #     '][local timestamp:' + str(mark.get('local timestamp')) +
+                    #     '][operation:' + mark.get('operation') +
+                    #     ']'
+                    # )
+                    f.writelines(
+                        "{0},{1},{2}\n".format(
+                            datetime.now().strftime('%Y/%m/%d-%H:%M:%S.%f')[:-2],
+                            lines_array[0],
+                            mark.get('operation')
+                        )
+                    )
+                elif len(lines_array) != 0:
+                    f.writelines(
+                        "{0},{1},\n".format(
+                            datetime.now().strftime('%Y/%m/%d-%H:%M:%S.%f')[:-2],
+                            lines_array[0]
+                        )
                     )
             except Empty:
                 continue
@@ -211,29 +229,50 @@ def read_device(client, dev_name, frequency):
                 sample += "%5.2f : " % (line_power)
                 lines_array.append("%.2f" % (line_power))
 
-            print "%s - %s =  %2.2f" % (datetime.now().strftime("%H:%M:%S.%f")[:-2], sample[:-2], sum_)
+            print "%s - %s =  %2.2f" % (datetime.now().strftime("%Y/%m/%d-%H:%M:%S.%f")[:-2], sample[:-2], sum_)
         # send_all_data(client, struct.pack("i", 1) )
 
 
 def main():
+    logger = logging.getLogger(__name__)
+
     # Parsear linea de comandos
     parser = OptionParser("usage: %prog -s|--server SERVER:PORT\n"
                           "       %prog -r|--read DEVNAME [-f|--freq FREQ]")
     parser.add_option("-s", "--server", action="store", type="string", dest="server")
     parser.add_option("-r", "--read", action="store", type="string", dest="device")
-    parser.add_option("-f", "--freq", action="store", type="int", dest="freq", default=0)
+    parser.add_option("-f", "--file", action="store", type="string", dest="file")
+    parser.add_option("-d", "--directory", action="store", type="string", dest="directory")
 
     (options, args) = parser.parse_args()
 
-    global client, mode, pool
+    exit_script = False
+    if not options.server or len(options.server.split(":")) != 2:
+        logger.error('You must specify a pm_server SERVER:PORT!')
+        exit_script = True
+    elif not options.directory:
+        logger.error('You must specify a working directory')
+        exit_script = True
+    elif not options.file:
+        logger.error('You must specify a file to save data')
+        exit_script = True
+
+    if exit_script:
+        parser.print_help()
+        sys.exit(-1)
+
+    if not os.path.exists(options.directory):
+        os.makedirs(options.directory)
+
+    global client, mode, pool, file
     mode = 'read'
+    file = options.directory + options.file
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((options.server.split(":")[0], int(options.server.split(":")[1])))
     signal.signal(signal.SIGINT, handler)
 
     pool = [PMInfoThread(marks=marks), FlaskThread(marks=marks)]
-    # pool[0].daemon = True
 
     for thread in pool:
         thread.daemon = True
