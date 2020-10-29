@@ -1,0 +1,22 @@
+# PMLib service file for systemd
+# Copy binay executable, .json configuration and this .service file to /opt/pmlib_server directory.
+# Make a symbolic link to /etc/systemd/system/. .
+# Add pmlib.service to system services with:
+#   sudo systemctl daemon-reload
+# Enable pmlib.service to start when booting
+#   sudo systemctl enable pmlib.service
+# Start the pmlib.service
+#   sudo systemctl start pmlib.service
+# Enjoy.
+
+[Unit]
+Description=PMLib energy reading service. To get power, voltage or current modify watt-APCape.json.
+
+[Service]
+WorkingDirectory=/opt/pmlib_server/
+Type=simple
+ExecStart=/opt/pmlib_server/pmlib_server --configfile watt-APCape.json
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
