@@ -1,8 +1,7 @@
- 
 # If the user specifies -DCMAKE_BUILD_TYPE on the command line, take
 # their definition and dump it in the cache along with proper
 # documentation, otherwise set  CMAKE_BUILD_TYPE to Debug prior to
-# calling PROJECT() 
+# calling PROJECT()
 #
 
 # IF(DEFINED CMAKE_BUILD_TYPE)
@@ -62,19 +61,19 @@ elseif ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
         message( FATAL_ERROR "g++ Version < 4.1, some targets will be skipped" )
         message( WARNING "Use CC/CXX env variable to define a newer compiler, e.g. export CC=/usr/bin/gcc-4.2; export CXX=/usr/bin/g++-4.2" )
     else(NOT(GXX_VERSION VERSION_GREATER 4.1))
-        #add_definitions( -std=c++14 ) # or -std=c++0x 
-        add_definitions( -std=c++11 ) # or -std=c++0x 
+        #add_definitions( -std=c++14 ) # or -std=c++0x
+        add_definitions( -std=c++11 ) # or -std=c++0x
     endif(NOT(GXX_VERSION VERSION_GREATER 4.1))
 elseif ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel" )
     message( STATUS "C++ Compiler is Intel" )
     message( WARNING "Compliance check not fully implemented yet" )
 endif()
 
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
 
-find_package(Boost 1.36.0) 
+find_package(Boost 1.36.0)
 find_package(Boost COMPONENTS system filesystem thread coroutine log log_setup REQUIRED)
 if(NOT(Boost_FOUND))
     message( FATAL_ERROR "Boost library is not installed in your system" )
@@ -84,7 +83,7 @@ add_definitions(-DBOOST_LOG_DYN_LINK)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-set(USE_STXXL ON) 
+set(USE_STXXL ON)
 if ( ${USE_STXXL} STREQUAL "ON" )
     add_definitions(-DUSE_STXXL)
     add_subdirectory(stxxl)
@@ -94,7 +93,7 @@ else()
     set(STXXL_LIBRARIES "")
 endif()
 
-include_directories(${Boost_INCLUDE_DIRS}) 
+include_directories(${Boost_INCLUDE_DIRS})
 
 set( PMLIB ${PROJECT_SOURCE_DIR}/pmlib )
 
@@ -102,7 +101,7 @@ set( PMLIBHEADERS
      ${PROJECT_SOURCE_DIR}/server.hpp
      ${PROJECT_SOURCE_DIR}/counter.hpp
      ${PROJECT_SOURCE_DIR}/device.hpp
-     ${PROJECT_SOURCE_DIR}/info.hpp     
+     ${PROJECT_SOURCE_DIR}/info.hpp
      ${PROJECT_SOURCE_DIR}/pmlib_sever.hpp
      ${PROJECT_SOURCE_DIR}/utils/color.hpp
      ${PROJECT_SOURCE_DIR}/utils/logger.hpp
@@ -113,7 +112,7 @@ set( PMLIBHEADERS
 set( PMLIBSRC
      ${PMLIB}/server.cpp
      ${PMLIB}/counter.cpp
-     ${PMLIB}/device.cpp     
+     ${PMLIB}/device.cpp
      ${PMLIB}/info.cpp
      ${PMLIB}/utils/jsoncpp.cpp
 )
@@ -134,7 +133,7 @@ target_link_libraries( pmlib_server ${Boost_LIBRARIES} ${STXXL_LIBRARIES})
 #configure_file(
 	#"${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
 	#"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-	#IMMEDIATE @ONLY 
+	#IMMEDIATE @ONLY
 	#)
 
 add_custom_target( uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" )
